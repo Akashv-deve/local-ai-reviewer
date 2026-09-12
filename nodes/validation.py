@@ -37,6 +37,13 @@ def human_gate(state: AgentState):
     print("\n--- [NODE: Human Gate Paused] ---")
     regen_count = state.get("regeneration_count", 0)
     
+    # POINT 1: Enforce absolute maximum of 3 regenerations
+    if regen_count >= 3:
+        print("\n" + "!"*50)
+        print("🛑 MAXIMUM REGENERATIONS (3) REACHED. FORCING REJECTION.")
+        print("!"*50)
+        return {"human_action": "reject"}
+    
     payload = {
         "review": state.get("code_review", []), "tests": state.get("generated_tests", ""),
         "validation_status": state.get("validation_status"), "validation_errors": state.get("validation_errors", []),

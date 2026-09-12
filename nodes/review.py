@@ -2,6 +2,9 @@ import json
 import requests
 from state import AgentState
 
+ALLOWED_SEVERITY = {"HIGH", "MEDIUM", "LOW"}
+ALLOWED_CATEGORY = {"Bug", "Security", "Performance", "Style"}
+
 def review_code(state: AgentState):
     print("\n--- [NODE: AI Code Review] ---")
     diff = state.get("filtered_diff", "")
@@ -10,9 +13,9 @@ def review_code(state: AgentState):
         return {"code_review": []}
 
     prompt = f"""
-    Perform a code review on this Git diff.
+    Perform a Python code review on this Git diff.
     Return 0 to 10 findings. If no issues exist, return an empty array [].
-    Output ONLY a raw JSON array. No conversational text.
+    Output ONLY a raw JSON array.
     Structure exactly like this:
     [
       {{
@@ -35,15 +38,17 @@ def review_code(state: AgentState):
         review_data = json.loads(raw_output)
         if isinstance(review_data, dict): review_data = [review_data]
         
-        # Point 1: Schema Validation
         valid_reviews = []
         for item in review_data:
             if isinstance(item, dict) and all(k in item for k in ("severity", "category", "file", "line", "issue", "recommendation")):
-                valid_reviews.append(item)
-                
+                # POINT 3: Enforce strict enum validation
+                if item["severity"].upper() in ALLOWED_SEVERITY and item["category"] in ALLOWED_CATEGORY:
+                    valid_reviews.append(item)
+                else:
+                    print(f"⚠️ Dropping malformed review finding (Invalid Enum): {item.get('severity')} | {item.get('category')}")
+                    
         print(f"✅ Review Complete: {len(valid_reviews)} valid issue(s) found.")
         return {"code_review": valid_reviews}
         
     except Exception as e:
-        print(f"⚠️ Review Error: {e}")
         return {"code_review": [{"severity": "ERROR", "file": "System", "line": "0", "category": "System", "issue": str(e), "recommendation": "Check API connection."}]}
