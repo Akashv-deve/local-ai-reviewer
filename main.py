@@ -2,35 +2,40 @@ from graph import agent
 from langgraph.types import Command
 
 if __name__ == "__main__":
-    # A unique thread ID is required so LangGraph knows which session to pause/resume
-    thread = {"configurable": {"thread_id": "review-session-1"}}
+    thread = {"configurable": {"thread_id": "review-session-2"}}
+    print("\n🚀 Starting Upgraded Agent Pipeline...")
     
-    print("\n🚀 Starting Agent Pipeline...")
-    
-    # 1. Pass {} instead of None to start the graph
     for event in agent.stream({}, config=thread):
         pass 
         
-    # 2. Extract the paused state data
     state = agent.get_state(thread)
     pending_interrupts = state.tasks[0].interrupts if state.tasks else []
     
     if pending_interrupts:
         payload = pending_interrupts[0].value
-        print("\n" + "="*40)
+        print("\n" + "="*50)
         print("🛑 AGENT PAUSED: HUMAN APPROVAL REQUIRED")
-        print("="*40)
-        print(payload["tests"])
-        print("="*40)
+        print("="*50)
+        if "errors" in payload:
+            print(f"VALIDATION ERRORS: {payload['errors']}")
+        else:
+            print(payload["tests"])
+        print("="*50)
         
-        # 3. Wait for human command
-        user_input = input("\nType 'approve' to execute tests, or anything else to abort: ")
+        user_input = input("\nCommands -> 'approve', 'regenerate', 'reject': ").strip().lower()
         
-        print("\nResuming graph execution...")
-        # 4. Resume the graph with the command
+        print(f"\nExecuting command: {user_input}...")
         for event in agent.stream(Command(resume=user_input), config=thread):
             pass
             
         final_state = agent.get_state(thread).values
-        print("\n--- FINAL TEST LOGS ---")
-        print(final_state.get("test_execution_logs", ""))
+        if final_state.get("test_execution_logs"):
+            print("\n" + "="*50)
+            print("📊 FINAL EXECUTION REPORT")
+            print("="*50)
+            print(f"✅ Tests Passed: {final_state.get('tests_passed', 0)}")
+            print(f"❌ Tests Failed: {final_state.get('tests_failed', 0)}")
+            print("-" * 50)
+            print("RAW LOGS:")
+            print(final_state["test_execution_logs"])
+            print("="*50)
