@@ -1,8 +1,18 @@
 import pytest
+from calculator import add, subtract, multiply
 
-def test_generate_tests():
-    from nodes import generate_tests
-    state = "test_state"  # Mocked AgentState
-    generate_tests(state)
-    # Add assertions based on expected behavior of generate_tests
-    assert True  # Placeholder assertion
+def test_add():
+    assert add(2, 3) == 5
+    assert add(-1, 1) == 0
+    assert add(-1, -1) == -2
+
+def test_subtract():
+    assert subtract(5, 3) == 2
+    assert subtract(-5, 2) == -7
+    assert subtract(0, 0) == 0
+
+def test_multiply():
+    assert multiply(4, 5) == 20
+    assert multiply(-4, 5) == -20
+    assert multiply(-4, -5) == 20
+    assert multiply(0, 5) == 0
