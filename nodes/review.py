@@ -7,37 +7,47 @@ def review_code(state: AgentState):
     diff = state.get("git_diff", "")
     
     if diff == "No changes detected." or not diff:
-        return {"code_review": {"status": "skipped"}}
+        return {"code_review": []}
 
     prompt = f"""
     Perform a code review on this Git diff.
-    Output ONLY a raw JSON object with this exact structure:
-    {{
+    Output ONLY a raw JSON array of objects. If no issues are found, output an empty array [].
+    Structure each object exactly like this:
+    [
+      {{
         "severity": "HIGH, MEDIUM, or LOW",
         "category": "Bug, Security, Performance, or Style",
-        "issue": "Brief description of the main issue",
+        "file": "filename",
+        "line": "line number or general location",
+        "issue": "Brief description",
         "recommendation": "How to fix it"
-    }}
-    Do not include markdown backticks. Return ONLY the JSON object.
+      }}
+    ]
     
     Diff:
     {diff}
     """
     
     try:
-        print("🤖 AI is reviewing code (Strict JSON mode)...")
+        print("🤖 AI is reviewing code (Strict JSON Array mode)...")
         response = requests.post('http://localhost:11434/api/generate', json={
             "model": "qwen2.5:7b",
             "prompt": prompt,
             "stream": False,
-            "format": "json" # Forces Ollama to return valid JSON
-        })
+            "format": "json"
+        }, timeout=120)
+        response.raise_for_status()
         
-        raw_output = response.json().get("response", "{}").strip()
+        raw_output = response.json().get("response", "[]").strip()
         review_data = json.loads(raw_output)
-        print(f"✅ Review Complete: {review_data.get('severity', 'UNKNOWN')} Severity Issue Found.")
+        
+        # Ensure it's a list
+        if isinstance(review_data, dict):
+            review_data = [review_data]
+            
+        print(f"✅ Review Complete: {len(review_data)} issue(s) found.")
         return {"code_review": review_data}
         
     except Exception as e:
         print(f"⚠️ Review Error: {e}")
-        return {"code_review": {"error": str(e)}}
+        return {"code_review": [{"severity": "ERROR", "issue": str(e)}]}

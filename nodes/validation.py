@@ -10,44 +10,41 @@ def validate_code(state: AgentState):
     try:
         tree = ast.parse(code)
         for node in ast.walk(tree):
-            # 1. Catch malicious imports
             if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
                 for alias in node.names:
                     if alias.name in ['os', 'subprocess', 'sys', 'shutil']:
                         errors.append(f"Security: Blocked import '{alias.name}'.")
-            
-            # 2. Catch dangerous function calls
             elif isinstance(node, ast.Call):
-                if hasattr(node.func, 'id') and node.func.id in ['eval', 'exec', 'open', '__import__']:
-                    errors.append(f"Security: Blocked function call '{node.func.id}()'.")
-                    
+                if hasattr(node.func, 'id') and node.func.id in ['eval', 'exec', 'open', '__import__', 'compile']:
+                    errors.append(f"Security: Blocked dangerous function '{node.func.id}()'.")
     except SyntaxError as e:
         errors.append(f"Syntax Error: {str(e)}")
 
     if errors:
-        print(f"❌ Validation Failed: {errors}")
+        print(f"❌ Static Security Check Failed: {errors}")
         return {"validation_status": "FAIL", "validation_errors": errors, "feedback": str(errors)}
         
-    print("✅ AST Validation Passed.")
+    print("✅ Static Security Check Passed (Syntax & Policy only).")
     return {"validation_status": "PASS", "validation_errors": [], "feedback": ""}
 
 def human_gate(state: AgentState):
     print("\n--- [NODE: Human Gate Paused] ---")
     
-    # Surface the JSON Code Review to the human
-    review = state.get("code_review", {})
-    if review and "error" not in review and "status" not in review:
-        print(f"\n📊 AI REVIEW:\nSeverity: {review.get('severity')}\nCategory: {review.get('category')}\nIssue: {review.get('issue')}\nFix: {review.get('recommendation')}\n")
+    payload = {
+        "review": state.get("code_review", []),
+        "tests": state.get("generated_tests", ""),
+        "validation_status": state.get("validation_status"),
+        "validation_errors": state.get("validation_errors", [])
+    }
 
     if state.get("validation_status") == "FAIL":
-         user_decision = interrupt({"message": "Code failed AST security validation.", "errors": state["validation_errors"]})
-         # If rejected by AST, automatically feed it back to regeneration
-         return {"human_action": user_decision if user_decision in ['reject', 'approve'] else 'regenerate'}
+         user_decision = interrupt({"message": "Code failed static security validation.", "payload": payload})
+         return {"human_action": "regenerate" if user_decision == "regenerate" else "reject"}
          
-    user_decision = interrupt({"message": "Review generated tests.", "tests": state["generated_tests"]})
+    user_decision = interrupt({"message": "Review generated tests.", "payload": payload})
     
-    # If the user manually types 'regenerate', set the feedback so the AI knows
-    if user_decision == "regenerate":
-        return {"human_action": "regenerate", "feedback": "Human reviewer requested regeneration. Improve the logic and test coverage."}
+    if isinstance(user_decision, str) and user_decision.startswith("regenerate:"):
+        reason = user_decision.split(":", 1)[1].strip()
+        return {"human_action": "regenerate", "feedback": reason}
         
     return {"human_action": user_decision}
