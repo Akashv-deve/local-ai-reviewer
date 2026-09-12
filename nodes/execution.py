@@ -9,7 +9,7 @@ def execute_tests(state: AgentState):
         return {"test_execution_logs": "Execution aborted by user.", "execution_status": "ABORTED"}
 
     # Point 6: Temporary Execution File
-    temp_file = ".temp_ai_test.py"
+    temp_file = "temp_ai_test_execution.py"
     try:
         with open(temp_file, "w") as f:
             f.write(state["generated_tests"])

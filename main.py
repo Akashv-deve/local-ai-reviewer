@@ -21,13 +21,15 @@ if __name__ == "__main__":
         
         # Print structured JSON Review Array
         reviews = payload.get("review", [])
+        metrics = payload.get("review_metrics", {})
+        
+        print(f"\n📊 AI CODE REVIEW (Total: {metrics.get('total', 0)} | Valid: {metrics.get('valid', 0)} | Rejected: {metrics.get('invalid', 0)})")
         if reviews:
-            print("\n📊 AI CODE REVIEW FINDINGS:")
             for rev in reviews:
                 print(f"[{rev.get('severity', 'INFO')}] {rev.get('file', 'Unknown')}:{rev.get('line', '?')} - {rev.get('issue', '')}")
                 print(f"   ↳ Fix: {rev.get('recommendation', '')}")
         else:
-             print("\n📊 AI CODE REVIEW: No issues found.")
+            print("No valid issues found.")
              
         print("\n🧪 GENERATED TESTS:")
         print(payload.get("tests", ""))

@@ -1,10 +1,11 @@
 import subprocess
 import re
+import os
 from state import AgentState
 
-# Configurable exclusions
-IGNORE_DIRS = ['nodes/', 'tests/']
-IGNORE_FILES = ['main.py', 'graph.py', 'state.py', 'database.py']
+# Configurable exclusions for enterprise deployment
+IGNORE_DIRS = os.getenv("AGENT_IGNORE_DIRS", "nodes/,tests/").split(",")
+IGNORE_FILES = os.getenv("AGENT_IGNORE_FILES", "main.py,graph.py,state.py,database.py").split(",")
 
 def extract_diff(state: AgentState):
     print("\n--- [NODE: Extracting Git Diff] ---")
@@ -16,7 +17,6 @@ def extract_diff(state: AgentState):
         if not diff.strip():
             return {"git_diff": "No changes detected.", "target_files": [], "filtered_diff": ""}
             
-        # Split diff into individual file hunks
         chunks = re.split(r'(?=^diff --git )', diff, flags=re.MULTILINE)
         target_files = []
         filtered_diff = ""
@@ -26,7 +26,6 @@ def extract_diff(state: AgentState):
             match = re.search(r'^diff --git a/.*? b/(.*?)$', chunk, re.MULTILINE)
             if match:
                 filename = match.group(1)
-                # ADDED: Ensure the file ends with .py
                 if filename.endswith('.py') and not any(filename.startswith(d) for d in IGNORE_DIRS) and filename not in IGNORE_FILES:
                     target_files.append(filename)
                     filtered_diff += chunk + "\n"
@@ -36,4 +35,4 @@ def extract_diff(state: AgentState):
     except FileNotFoundError:
         return {"git_diff": "Error: Git is not installed.", "target_files": [], "filtered_diff": ""}
     except subprocess.CalledProcessError:
-        return {"git_diff": "Error: Not a Git repository or Git command failed.", "target_files": [], "filtered_diff": ""}
+        return {"git_diff": "Error: Not a Git repo or command failed.", "target_files": [], "filtered_diff": ""}

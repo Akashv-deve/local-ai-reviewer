@@ -39,16 +39,20 @@ def review_code(state: AgentState):
         if isinstance(review_data, dict): review_data = [review_data]
         
         valid_reviews = []
+        invalid_count = 0
+        
         for item in review_data:
             if isinstance(item, dict) and all(k in item for k in ("severity", "category", "file", "line", "issue", "recommendation")):
-                # POINT 3: Enforce strict enum validation
                 if item["severity"].upper() in ALLOWED_SEVERITY and item["category"] in ALLOWED_CATEGORY:
                     valid_reviews.append(item)
                 else:
-                    print(f"⚠️ Dropping malformed review finding (Invalid Enum): {item.get('severity')} | {item.get('category')}")
+                    invalid_count += 1
+            else:
+                invalid_count += 1
                     
-        print(f"✅ Review Complete: {len(valid_reviews)} valid issue(s) found.")
-        return {"code_review": valid_reviews}
+        metrics = {"total": len(review_data), "valid": len(valid_reviews), "invalid": invalid_count}
+        print(f"✅ Review Complete: {len(valid_reviews)} valid, {invalid_count} rejected.")
+        return {"code_review": valid_reviews, "review_metrics": metrics}
         
     except Exception as e:
-        return {"code_review": [{"severity": "ERROR", "file": "System", "line": "0", "category": "System", "issue": str(e), "recommendation": "Check API connection."}]}
+        return {"code_review": [], "review_metrics": {"total": 0, "valid": 0, "invalid": 1}}

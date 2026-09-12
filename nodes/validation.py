@@ -45,8 +45,11 @@ def human_gate(state: AgentState):
         return {"human_action": "reject"}
     
     payload = {
-        "review": state.get("code_review", []), "tests": state.get("generated_tests", ""),
-        "validation_status": state.get("validation_status"), "validation_errors": state.get("validation_errors", []),
+        "review": state.get("code_review", []), 
+        "review_metrics": state.get("review_metrics", {}), # NEW
+        "tests": state.get("generated_tests", ""),
+        "validation_status": state.get("validation_status"), 
+        "validation_errors": state.get("validation_errors", []),
         "regen_count": regen_count
     }
 

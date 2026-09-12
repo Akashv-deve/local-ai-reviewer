@@ -2,15 +2,16 @@ from typing import TypedDict, List, Dict, Any, Optional
 
 class AgentState(TypedDict):
     git_diff: str
-    filtered_diff: str           # NEW: Only the target code hunks
+    filtered_diff: str
     target_files: List[str]      
     code_review: List[Dict[str, Any]]
+    review_metrics: Dict[str, int]  # NEW: Tracks total, valid, and rejected findings
     generated_tests: str
     validation_status: str
     validation_errors: List[str]
     human_action: str
     feedback: Optional[str]
-    regeneration_count: int      # NEW: Prevents infinite loops
+    regeneration_count: int
     test_execution_logs: str
     tests_passed: int
     tests_failed: int
