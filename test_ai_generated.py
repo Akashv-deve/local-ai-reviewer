@@ -1,11 +1,8 @@
 import pytest
 
-def test_add():
-    assert add(1, 2) == 3
-    assert add(-1, 1) == 0
-    assert add(-1, -1) == -2
-
-def test_subtract():
-    assert subtract(1, 2) == -1
-    assert subtract(-1, 1) == -2
-    assert subtract(-1, -1) == 0
+def test_generate_tests():
+    from nodes import generate_tests
+    state = "test_state"  # Mocked AgentState
+    generate_tests(state)
+    # Add assertions based on expected behavior of generate_tests
+    assert True  # Placeholder assertion

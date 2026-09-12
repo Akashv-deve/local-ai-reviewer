@@ -25,9 +25,10 @@ def generate_tests(state: AgentState):
     Act as an expert Python engineer. Write a pytest suite for this git diff. 
     Rules:
     1. Return ONLY valid Python code. No markdown, no backticks, no explanations.
-    2. Use standard 'import pytest'. Do not write 'from pytest import pytest'.
-    3. Write actual test cases for the functions added in the diff.
-    
+    2. Use standard 'import pytest'.
+    3. CRITICAL: Look at the file path in the git diff (e.g., a/calculator.py) and write the correct import statement at the top of your code. (Example: from calculator import add, subtract).
+    4. Write actual test cases for the functions added in the diff.
+
     Diff:
     {diff}
     """
