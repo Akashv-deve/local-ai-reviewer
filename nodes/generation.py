@@ -3,36 +3,33 @@ from state import AgentState
 
 def generate_tests(state: AgentState):
     print("\n--- [NODE: Generating Tests via Local LLM] ---")
-    diff = state.get("git_diff", "")
+    diff = state.get("filtered_diff", "")
     feedback = state.get("feedback", "")
     targets = state.get("target_files", [])
     
-    # FIXED: Strict startswith check
-    if diff == "No changes detected." or diff.startswith("Error:"):
-         return {"generated_tests": "Skipped"}
+    if not diff or diff.startswith("Error:"): return {"generated_tests": "Skipped"}
          
     prompt = f"""
     Write a complete pytest suite for this git diff. 
-    
-    CRITICAL RULES - YOU MUST OBEY:
+    CRITICAL RULES:
     1. TARGET FILES: You may ONLY write tests for these specific files: {targets}
     2. DO NOT output conversational text, summaries, or explanations. 
     3. OUTPUT STRICTLY EXECUTABLE PYTHON CODE.
     4. Always start your response with 'import pytest'.
     
-    Diff:
+    TARGET DIFF (Only test the logic shown below):
     {diff}
     """
     
     if feedback:
-        print(f"⚠️ Applying human feedback to next generation...")
-        prompt += f"\n\nREJECTION REASON: '{feedback}'. Fix the code to address this."
+        print(f"⚠️ Applying human/system feedback to next generation...")
+        prompt += f"\n\nCRITICAL FIX REQUIRED: Your previous attempt was rejected. REASON: '{feedback}'. Fix the code."
         
     try:
         print("🤖 AI is typing...")
         response = requests.post('http://localhost:11434/api/generate', json={
             "model": "qwen2.5:3b", "prompt": prompt, "stream": True 
-        }, stream=True, timeout=300) # FIXED: 300s timeout
+        }, stream=True, timeout=300)
         response.raise_for_status()
         
         tests = ""
@@ -45,7 +42,6 @@ def generate_tests(state: AgentState):
         print("\n\n--- [Finished Typing] ---")
         match = re.search(r'```python(.*?)```', tests, re.DOTALL)
         clean_code = match.group(1).strip() if match else tests.replace('```python', '').replace('```', '').strip()
-        
         return {"generated_tests": clean_code, "feedback": ""}
     except Exception as e:
-        return {"generated_tests": f"Error connecting to Ollama: {str(e)}"}
+        return {"generated_tests": f"HTTP Error connecting to Ollama: {str(e)}"}
