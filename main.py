@@ -2,7 +2,7 @@ from graph import agent
 from langgraph.types import Command
 
 def run_agent():
-    thread = {"configurable": {"thread_id": "portfolio-demo-3"}}
+    thread = {"configurable": {"thread_id": "portfolio-demo-10"}}
     print("\n🚀 Starting Upgraded Agent Pipeline...")
     
     # 1. Initial run of the graph
