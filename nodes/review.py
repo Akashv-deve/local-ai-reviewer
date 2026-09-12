@@ -12,14 +12,14 @@ def review_code(state: AgentState):
 
     prompt = f"""
     Perform a code review on this Git diff.
-    Output ONLY a raw JSON array of objects. If no issues are found, output an empty array [].
-    Structure each object exactly like this:
+    Output ONLY a raw JSON array of objects. No markdown. No conversational text.
+    Structure exactly like this:
     [
       {{
-        "severity": "HIGH, MEDIUM, or LOW",
-        "category": "Bug, Security, Performance, or Style",
-        "file": "filename",
-        "line": "line number",
+        "severity": "HIGH",
+        "category": "Bug",
+        "file": "calculator.py",
+        "line": "10",
         "issue": "Brief description",
         "recommendation": "How to fix it"
       }}

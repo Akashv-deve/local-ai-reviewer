@@ -12,12 +12,13 @@ def generate_tests(state: AgentState):
          return {"generated_tests": "Skipped"}
          
     prompt = f"""
-    Write a pytest suite for this git diff. 
+    Write a complete pytest suite for this git diff. 
     
-    CRITICAL RULES:
+    CRITICAL RULES - YOU MUST OBEY:
     1. TARGET FILES: You may ONLY write tests for these specific files: {targets}
-    2. Do NOT test LangGraph internals, graph.py, main.py, or any node files.
-    3. Return ONLY valid Python code. No markdown.
+    2. DO NOT output conversational text, summaries, or explanations. 
+    3. OUTPUT STRICTLY EXECUTABLE PYTHON CODE.
+    4. Always start your response with 'import pytest'.
     
     Diff:
     {diff}

@@ -13,12 +13,7 @@ def divide(a, b):
 def unsafe_divide(a, b):
     return a / b
 
-    # Python Program to find the L.C.M. of two input number
-
-def compute_lcm(a, b):
-
-   # choose the greater number
-   if a > b:
-       greater = a
-   else:
-       greater = b
+def calculate_average(numbers):
+    # Bug: Doesn't check for an empty list, which will cause a ZeroDivisionError
+    total = sum(numbers)
+    return total / len(numbers)
