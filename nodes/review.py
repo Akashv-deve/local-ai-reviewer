@@ -52,7 +52,13 @@ def review_code(state: AgentState):
                     
         metrics = {"total": len(review_data), "valid": len(valid_reviews), "invalid": invalid_count}
         print(f"✅ Review Complete: {len(valid_reviews)} valid, {invalid_count} rejected.")
-        return {"code_review": valid_reviews, "review_metrics": metrics}
+        return {"code_review": valid_reviews, "review_metrics": metrics, "review_error": None}
         
     except Exception as e:
-        return {"code_review": [], "review_metrics": {"total": 0, "valid": 0, "invalid": 1}}
+        error_reason = str(e)
+        print(f"⚠️ Review Error: {error_reason}")
+        return {
+            "code_review": [], 
+            "review_metrics": {"total": 0, "valid": 0, "invalid": 0}, 
+            "review_error": error_reason
+        }

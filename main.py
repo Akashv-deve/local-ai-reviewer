@@ -19,17 +19,22 @@ if __name__ == "__main__":
         print("🛑 AGENT PAUSED: HUMAN APPROVAL REQUIRED")
         print("="*50)
         
-        # Print structured JSON Review Array
+        # Print structured JSON Review Array or Review Error
         reviews = payload.get("review", [])
         metrics = payload.get("review_metrics", {})
+        review_error = payload.get("review_error")
         
-        print(f"\n📊 AI CODE REVIEW (Total: {metrics.get('total', 0)} | Valid: {metrics.get('valid', 0)} | Rejected: {metrics.get('invalid', 0)})")
-        if reviews:
-            for rev in reviews:
-                print(f"[{rev.get('severity', 'INFO')}] {rev.get('file', 'Unknown')}:{rev.get('line', '?')} - {rev.get('issue', '')}")
-                print(f"   ↳ Fix: {rev.get('recommendation', '')}")
+        if review_error:
+            print(f"\n⚠️ AI Code Review failed")
+            print(f"Reason: {review_error}")
         else:
-            print("No valid issues found.")
+            print(f"\n📊 AI CODE REVIEW (Total: {metrics.get('total', 0)} | Valid: {metrics.get('valid', 0)} | Rejected: {metrics.get('invalid', 0)})")
+            if reviews:
+                for rev in reviews:
+                    print(f"[{rev.get('severity', 'INFO')}] {rev.get('file', 'Unknown')}:{rev.get('line', '?')} - {rev.get('issue', '')}")
+                    print(f"   ↳ Fix: {rev.get('recommendation', '')}")
+            else:
+                print("No valid issues found.")
              
         print("\n🧪 GENERATED TESTS:")
         print(payload.get("tests", ""))

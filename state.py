@@ -5,7 +5,8 @@ class AgentState(TypedDict):
     filtered_diff: str
     target_files: List[str]      
     code_review: List[Dict[str, Any]]
-    review_metrics: Dict[str, int]  # NEW: Tracks total, valid, and rejected findings
+    review_metrics: Dict[str, int]
+    review_error: Optional[str]      # NEW: Explicitly captures review failures
     generated_tests: str
     validation_status: str
     validation_errors: List[str]
