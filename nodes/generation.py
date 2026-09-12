@@ -5,15 +5,18 @@ def generate_tests(state: AgentState):
     print("\n--- [NODE: Generating Tests via Local LLM] ---")
     diff = state.get("git_diff", "")
     feedback = state.get("feedback", "")
+    targets = state.get("target_files", [])
     
-    if diff == "No changes detected.":
+    # FIXED: Strict startswith check
+    if diff == "No changes detected." or diff.startswith("Error:"):
          return {"generated_tests": "Skipped"}
          
     prompt = f"""
     Write a pytest suite for this git diff. 
+    
     CRITICAL RULES:
-    1. ONLY generate tests for the business logic and application files changed.
-    2. DO NOT write tests for the AI agent itself, LangGraph, node orchestration, or CLI files.
+    1. TARGET FILES: You may ONLY write tests for these specific files: {targets}
+    2. Do NOT test LangGraph internals, graph.py, main.py, or any node files.
     3. Return ONLY valid Python code. No markdown.
     
     Diff:
@@ -22,13 +25,13 @@ def generate_tests(state: AgentState):
     
     if feedback:
         print(f"⚠️ Applying human feedback to next generation...")
-        prompt += f"\n\nCRITICAL FIX REQUIRED: The human reviewer rejected your previous attempt with this reason: '{feedback}'. Fix the code to address this."
+        prompt += f"\n\nREJECTION REASON: '{feedback}'. Fix the code to address this."
         
     try:
         print("🤖 AI is typing...")
         response = requests.post('http://localhost:11434/api/generate', json={
-            "model": "qwen2.5:7b", "prompt": prompt, "stream": True 
-        }, stream=True)
+            "model": "qwen2.5:3b", "prompt": prompt, "stream": True 
+        }, stream=True, timeout=300) # FIXED: 300s timeout
         response.raise_for_status()
         
         tests = ""
@@ -44,4 +47,4 @@ def generate_tests(state: AgentState):
         
         return {"generated_tests": clean_code, "feedback": ""}
     except Exception as e:
-        return {"generated_tests": f"Error: {str(e)}"}
+        return {"generated_tests": f"Error connecting to Ollama: {str(e)}"}
