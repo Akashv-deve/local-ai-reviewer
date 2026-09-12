@@ -9,3 +9,6 @@ def multiply(a, b):
 
 def divide(a, b):
     return a / b
+
+def unsafe_divide(a, b):
+    return a / b

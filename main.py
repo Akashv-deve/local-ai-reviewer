@@ -2,7 +2,7 @@ from graph import agent
 from langgraph.types import Command
 
 if __name__ == "__main__":
-    thread = {"configurable": {"thread_id": "review-session-2"}}
+    thread = {"configurable": {"thread_id": "portfolio-demo-1"}}
     print("\n🚀 Starting Upgraded Agent Pipeline...")
     
     for event in agent.stream({}, config=thread):
@@ -16,6 +16,7 @@ if __name__ == "__main__":
         print("\n" + "="*50)
         print("🛑 AGENT PAUSED: HUMAN APPROVAL REQUIRED")
         print("="*50)
+        
         if "errors" in payload:
             print(f"VALIDATION ERRORS: {payload['errors']}")
         else:
@@ -23,8 +24,8 @@ if __name__ == "__main__":
         print("="*50)
         
         user_input = input("\nCommands -> 'approve', 'regenerate', 'reject': ").strip().lower()
-        
         print(f"\nExecuting command: {user_input}...")
+        
         for event in agent.stream(Command(resume=user_input), config=thread):
             pass
             
@@ -34,8 +35,9 @@ if __name__ == "__main__":
             print("📊 FINAL EXECUTION REPORT")
             print("="*50)
             print(f"✅ Tests Passed: {final_state.get('tests_passed', 0)}")
-            print(f"❌ Tests Failed: {final_state.get('tests_failed', 0)}")
+            print(f"❌ Tests Failed/Errors: {final_state.get('tests_failed', 0)}")
             print("-" * 50)
-            print("RAW LOGS:")
-            print(final_state["test_execution_logs"])
+            print("RAW LOGS (Truncated):")
+            # Only print the last 1500 characters of logs to keep the terminal clean
+            print(final_state["test_execution_logs"][-1500:]) 
             print("="*50)
