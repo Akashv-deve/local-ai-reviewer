@@ -142,11 +142,14 @@ The repository includes tests for important agent components, including:
 Run the test suite with:
 
 ```bash
+
 pytest
+
+```
 
 > **Important:** This project uses controlled subprocess execution. It is **not a security sandbox** and should not be treated as a safe environment for arbitrary untrusted code.
 
-```
+---
 
 ## Architecture
 
