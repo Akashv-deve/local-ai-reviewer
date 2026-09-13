@@ -6,7 +6,7 @@ Built with **LangGraph + Ollama + Qwen2.5:3b + Python AST + pytest**.
 
 ## Demo
 
-**[▶ Watch the full project demo](./demo/local-ai-reviewer-demo.mp4)**
+**[▶ Watch the full project demo](./demo/local-ai-reviewer_demo.mp4)**
 
 ## Human-in-the-Loop Recovery
 
