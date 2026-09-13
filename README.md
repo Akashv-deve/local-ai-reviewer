@@ -130,7 +130,6 @@ The agent captures pytest output and reports:
 
 Generated test files are temporary and removed after execution.
 
-```markdown
 ## Test Coverage
 
 The repository includes tests for important agent components, including:
@@ -146,6 +145,8 @@ Run the test suite with:
 pytest
 
 > **Important:** This project uses controlled subprocess execution. It is **not a security sandbox** and should not be treated as a safe environment for arbitrary untrusted code.
+
+```
 
 ## Architecture
 
@@ -216,6 +217,9 @@ local-ai-reviewer/
 ├── state.py
 ├── requirements.txt
 └── .gitignore
+
+```
+
 ## Tech Stack
 
 | Technology | Purpose                  |
