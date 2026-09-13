@@ -6,7 +6,17 @@ Built with **LangGraph + Ollama + Qwen2.5:3b + Python AST + pytest**.
 
 ## Demo
 
-**[▶ Watch the full project demo](YOUR_DEMO_LINK_HERE)**
+**[▶ Watch the full project demo](./demo/local-ai-reviewer-demo.mp4)**
+
+## Human-in-the-Loop Recovery
+
+During the demo, the local LLM initially generates an incorrect test suite.
+The human reviewer rejects the result and provides feedback.
+The agent then regenerates the tests, validates the new code, and the corrected
+test suite passes execution.
+
+This demonstrates that the system is designed to handle imperfect LLM output
+rather than blindly executing generated code.
 
 The demo shows the complete workflow:
 
